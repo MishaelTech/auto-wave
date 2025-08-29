@@ -4,6 +4,7 @@ export const dynamic = "force-dynamic";
 
 import * as React from "react";
 import { useState, useMemo } from "react";
+// import { useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
@@ -38,11 +39,8 @@ import { useAuth, useUser } from "@clerk/nextjs";
 
 const steps = ["Car", "Select work", "Details", "Booking"] as const;
 
-const Repairs = ({
-    searchParams,
-}: {
-    searchParams: Record<string, string | string[] | undefined>;
-}) => {
+const Repairs = () => {
+    // const searchParams = useSearchParams();
     const { userId, getToken } = useAuth();
     const { isSignedIn } = useUser();
     // const [step, setStep] = useState<0 | 1 | 2 | 3>(0);
@@ -55,8 +53,10 @@ const Repairs = ({
         resolver: zodResolver(RepairSchema),
         defaultValues: {
             // Prefill from /repair?reg=...&postcode=...
-            regNumber: (searchParams.reg?.toString() ?? "").toUpperCase(),
-            postcode: searchParams.postcode?.toString() ?? "",
+            // regNumber: (searchParams.get("reg") ?? "").toUpperCase(),
+            // postcode: searchParams.get("postcode") ?? "",
+            regNumber: "",
+            postcode: "",
             make: "",
             model: "",
             year: "",
