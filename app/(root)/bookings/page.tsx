@@ -23,6 +23,7 @@ import { Booking, RepairForm } from "@/types";
 import { Spinner } from "@/components/Spinner";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/navigation";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const ViewRepairBookings = () => {
     const { userId, getToken } = useAuth();
@@ -106,7 +107,14 @@ const ViewRepairBookings = () => {
         if (isSignedIn) fetchBookings();
     }, [isSignedIn]);
 
-
+    useEffect(() => {
+        if (alert) {
+            const timer = setTimeout(() => {
+                setAlert(null);
+            }, 3000);
+            return () => clearTimeout(timer); // cleanup when alert changes/unmounts
+        }
+    }, [alert]);
 
     if (!isSignedIn) {
         return (
@@ -120,17 +128,35 @@ const ViewRepairBookings = () => {
         <section className="px-6 md:px-8 lg:px-12 py-10">
             <div className="max-w-5xl mx-auto space-y-6">
                 {/* Header */}
-                <div className="flex justify-between items-center">
-                    <h1 className="text-3xl font-bold">My Repair Bookings</h1>
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+                    <h1 className="text-2xl sm:text-3xl font-bold">My Repair Bookings</h1>
+
                     <Input
                         type="text"
                         placeholder="🔍 Search bookings..."
-                        className="w-64"
+                        className="w-full sm:w-64"
                         onChange={(e) => {
-                            // TODO: filter bookings dynamically
+                            const query = e.target.value.toLowerCase();
+                            if (query === "") {
+                                fetchBookings();
+                            } else {
+                                setBookings((prev) =>
+                                    prev.filter(
+                                        (b) =>
+                                            b.make.toLowerCase().includes(query) ||
+                                            b.model.toLowerCase().includes(query) ||
+                                            b.reg_number.toLowerCase().includes(query) ||
+                                            b.full_name.toLowerCase().includes(query) ||
+                                            b.work_types.some((wt) =>
+                                                wt.toLowerCase().includes(query)
+                                            )
+                                    )
+                                );
+                            }
                         }}
                     />
                 </div>
+
 
                 {/* Inline Alert */}
                 <AnimatePresence>
@@ -168,92 +194,101 @@ const ViewRepairBookings = () => {
                         <p className="text-sm">Start by creating your first booking!</p>
                     </div>
                 ) : (
-                    <div className="grid md:grid-cols-2 gap-6">
-                        {bookings.map((booking) => (
-                            <motion.div
-                                key={booking.id}
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0 }}
-                            >
-                                <Card className="shadow-sm hover:shadow-lg transition rounded-2xl">
-                                    <CardHeader>
-                                        <CardTitle className="flex justify-between items-center capitalize">
-                                            {booking.make} {booking.model} ({booking.year})
-                                            <span
-                                                className={`text-xs px-2 py-1 rounded-full
-                                                    ${booking.status === "pending"
-                                                        ? "bg-yellow-100 text-yellow-800"
-                                                        : booking.status === "accepted"
-                                                            ? "bg-blue-100 text-blue-700"
-                                                            : booking.status === "completed"
-                                                                ? "bg-green-100 text-green-700"
-                                                                : "bg-gray-100 text-gray-700"
-                                                    }`
-                                                }
+                    <ScrollArea className="h-[70vh] pr-1 sm:pr-2">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {bookings.map((booking) => (
+                                <motion.div
+                                    key={booking.id}
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0 }}
+                                >
+                                    <Card className="shadow-sm hover:shadow-lg transition rounded-2xl h-full flex flex-col">
+                                        <CardHeader>
+                                            <CardTitle className="flex flex-wrap justify-between items-center gap-2 text-lg md:text-xl capitalize">
+                                                <span className="truncate">
+                                                    {booking.make} {booking.model} ({booking.year})
+                                                </span>
+                                                <span
+                                                    className={`text-xs px-2 py-1 rounded-full 
+                                                            ${booking.status === "pending"
+                                                            ? "bg-yellow-100 text-yellow-800"
+                                                            : booking.status === "accepted"
+                                                                ? "bg-blue-100 text-blue-700"
+                                                                : booking.status === "completed"
+                                                                    ? "bg-green-100 text-green-700"
+                                                                    : "bg-gray-100 text-gray-700"
+                                                        }`}
+                                                >
+                                                    {booking.status}
+                                                </span>
+                                            </CardTitle>
+                                            <CardDescription className="text-xs md:text-sm break-words">
+                                                Plate: {booking.reg_number} | Work:{" "}
+                                                {booking.work_types.join(", ")}
+                                            </CardDescription>
+                                        </CardHeader>
+
+                                        <CardContent className="space-y-2 text-sm md:text-base break-words">
+                                            <p className="capitalize">
+                                                <span className="font-semibold">Name:</span>{" "}
+                                                {booking.full_name}
+                                            </p>
+                                            <p>
+                                                <span className="font-semibold">Phone:</span>{" "}
+                                                {booking.phone}
+                                            </p>
+                                            <p className="line-clamp-2 sm:line-clamp-3 md:line-clamp-none">
+                                                <span className="font-semibold">Problem:</span>{" "}
+                                                {booking.problem_description}
+                                            </p>
+                                            <p className="text-xs text-gray-500">
+                                                Created: {new Date(booking.created_at).toLocaleString()}
+                                            </p>
+                                        </CardContent>
+
+                                        <CardFooter className="flex flex-col sm:flex-row justify-between gap-2 mt-auto">
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => {
+                                                    setEditing(booking);
+                                                    setEditForm(booking);
+                                                }}
+                                                className="w-full sm:w-auto"
                                             >
-                                                {booking.status}
-                                            </span>
-                                        </CardTitle>
-                                        <CardDescription>
-                                            Plate: {booking.reg_number} | Work:{" "}
-                                            {booking.work_types.join(", ")}
-                                        </CardDescription>
-                                    </CardHeader>
-                                    <CardContent className="space-y-1">
-                                        <p className="capitalize">
-                                            <span className="font-semibold">Name:</span>{" "}
-                                            {booking.full_name}
-                                        </p>
-                                        <p>
-                                            <span className="font-semibold">Phone:</span>{" "}
-                                            {booking.phone}
-                                        </p>
-                                        <p>
-                                            <span className="font-semibold">Problem:</span>{" "}
-                                            {booking.problem_description}
-                                        </p>
-                                        <p className="text-sm text-gray-500">
-                                            Created:{" "}
-                                            {new Date(booking.created_at).toLocaleString()}
-                                        </p>
-                                    </CardContent>
-                                    <CardFooter className="flex flex-col justify-start items-start gap-3">
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => {
-                                                setEditing(booking);
-                                                setEditForm(booking);
-                                            }}
-                                        >
-                                            <Pencil className="w-4 h-4 mr-1" /> Edit
-                                        </Button>
-                                        <Button
-                                            variant="destructive"
-                                            size="sm"
-                                            onClick={() => setDeleting(booking)}
-                                        >
-                                            <Trash2 className="w-4 h-4 mr-1" /> Delete
-                                        </Button>
+                                                <Pencil className="w-4 h-4 mr-1" /> Edit
+                                            </Button>
+                                            <Button
+                                                variant="destructive"
+                                                size="sm"
+                                                onClick={() => setDeleting(booking)}
+                                                className="w-full sm:w-auto"
+                                            >
+                                                <Trash2 className="w-4 h-4 mr-1" /> Delete
+                                            </Button>
+                                        </CardFooter>
 
                                         {booking.status === "accepted" && (
-                                            <div className="mt-3 w-full p-3 rounded-lg bg-blue-50 border border-blue-200 text-sm text-blue-700">
+                                            <div className="mt-3 w-full p-3 rounded-lg bg-blue-50 border border-blue-200 text-xs md:text-sm text-blue-700">
                                                 ✅ Your request has been accepted.{" "}
                                                 <Button
                                                     variant="link"
-                                                    className="p-0 h-auto font-semibold text-blue-700 underline ml-1 cursor-pointer"
-                                                    onClick={() => router.push(`/mechanic/${booking.mechanic_id}/booking/${booking.id}`)}
+                                                    className="p-0 h-auto font-semibold text-blue-700 underline ml-1 cursor-pointer text-sm"
+                                                    onClick={() =>
+                                                        router.push(`/mechanic/${booking.mechanic_id}/booking/${booking.id}`)
+                                                    }
                                                 >
                                                     View mechanic profile
                                                 </Button>
                                             </div>
                                         )}
-                                    </CardFooter>
-                                </Card>
-                            </motion.div>
-                        ))}
-                    </div>
+                                    </Card>
+                                </motion.div>
+                            ))}
+                        </div>
+                    </ScrollArea>
+
                 )}
             </div>
 

@@ -180,3 +180,24 @@ export const getRepairsById = async (bookingId: string, token: string) => {
   return data;
 }
 
+
+// actions/policereport.ts
+
+export async function getPoliceReportUrl(path: string, token: string) {
+  const supabase = await supabaseClient(token);
+
+  console.log("📂 Generating signed URL for path:", path);
+
+  const { data, error } = await supabase.storage
+    .from("police-reports")
+    .createSignedUrl(path, 60 * 60); // 1 hour
+
+  if (error) {
+    console.error("Supabase signed URL error:", error);
+    throw error;
+  }
+
+  console.log("✅ Signed URL generated:", data.signedUrl);
+  return data.signedUrl;
+}
+

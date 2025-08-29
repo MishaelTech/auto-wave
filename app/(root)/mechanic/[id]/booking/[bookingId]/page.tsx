@@ -12,6 +12,8 @@ import { Calendar, Clock, Download, MapPin, Phone } from "lucide-react";
 import { formatDate, formatTime, statusColorClasses } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Spinner } from "@/components/Spinner";
+import Link from "next/link";
+import { PoliceReportDownload } from "@/components/PoliceReportDownload";
 
 export default function MechanicBookingPage({
     params,
@@ -75,33 +77,23 @@ export default function MechanicBookingPage({
                     </div>
                 </CardHeader>
 
-                <CardContent className="space-y-2">
+                <CardContent className="space-y-1 text-sm sm:text-base">
                     <p>
                         <span className="font-semibold">Phone:</span> {mechanic?.phone}
+                    </p>
+                    <p>
+                        <span className="font-semibold">Address:</span> {mechanic?.address}
                     </p>
                     <p>
                         <span className="font-semibold">Postcode:</span> {mechanic?.postcode}
                     </p>
 
-                    {mechanic?.police_report && (
-                        <div className="mt-3">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                asChild
-                                className="flex items-center gap-2"
-                            >
-                                <a
-                                    href={mechanic.police_report}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    download
-                                >
-                                    <Download className="h-4 w-4" /> Download Police Report
-                                </a>
-                            </Button>
+                    {/* {mechanic?.police_report && (
+                        <div className="mt-3 items-center justify-center flex flex-wrap gap-2">
+                            <PoliceReportDownload path={mechanic.police_report} />
                         </div>
-                    )}
+                    )} */}
+
                 </CardContent>
             </Card>
 
