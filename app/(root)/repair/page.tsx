@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import * as React from "react";
 import { useState, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
@@ -140,13 +142,13 @@ const Repairs = () => {
                     `Description: ${values.problemDescription}\n\n` +
                     `Estimated Price Range: ₦${priceEstimate?.lo?.toLocaleString()} - ₦${priceEstimate?.hi?.toLocaleString()}`,
                 duration: 5000,
-                action: {
-                    label: "View Booking",
-                    onClick: () => {
-                        // Redirect to booking details page
-                        window.location.href = `/repair/booking/${values.regNumber}`;
-                    },
-                },
+                // action: {
+                //     label: "View Booking",
+                //     onClick: () => {
+                //         // Redirect to booking details page
+                //         window.location.href = `/repair/booking/${values.regNumber}`;
+                //     },
+                // },
             });
             // Reset form after successful submission
             form.reset();
