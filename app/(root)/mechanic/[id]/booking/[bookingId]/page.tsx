@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar, Clock, Download, MapPin, Phone } from "lucide-react";
 import { formatDate, formatTime, statusColorClasses } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Spinner } from "@/components/Spinner";
 
 export default function MechanicBookingPage({
     params,
@@ -47,7 +48,9 @@ export default function MechanicBookingPage({
     }, [id, bookingId, getToken]);
 
     if (!mechanic || !booking) {
-        return <div className="p-6 text-gray-600">Loading...</div>;
+        return <div className="p-6 text-gray-600">
+            <Spinner size="md" />
+        </div>;
     }
 
     return (

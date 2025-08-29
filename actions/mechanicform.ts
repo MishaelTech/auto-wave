@@ -94,37 +94,40 @@ export const getMechanicByMechanicId = async (mechanicId: string, token: string)
   const supabase = await supabaseClient(token);
 
   const { data, error } = await supabase
-    .from("repairs")
+    .from("apply_to_be_a_mechanic")
     .select(`
-      id,
-      mechanic_id (
+      postcode,
+      phone,
+      police_report,
+      address,
+      user: users!fk_user (
         id,
         first_name,
         last_name,
         email,
         avatar_url
-      ),
-      mechanic_application (
-        postcode,
-        phone,
-        police_report,
-        address
       )
     `)
-    .eq("mechanic_id", mechanicId)
-    .single();
+    .eq("user_id", mechanicId)
+    .maybeSingle();
 
   if (error) {
-    console.error("Error fetching mechanic by ID:", error);
+    console.error("Error fetching mechanic:", error);
     throw error;
   }
 
-  // merge the two relations into one object
+  if (!data) return null;
+
   return {
-    ...data.mechanic_id,
-    ...data.mechanic_application,
+    ...data.user,
+    postcode: data.postcode,
+    phone: data.phone,
+    police_report: data.police_report,
+    address: data.address,
   };
 };
+
+
 
 
 // export const getMechanicByMechanicId = async (mechanicId: string, token: string) => {
