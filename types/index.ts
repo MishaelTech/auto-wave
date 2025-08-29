@@ -98,7 +98,7 @@ export const DETAILS_FIELDS = [
 export const mechanicFormSchema = z.object({
     firstName: z.string().min(2, "First name is required"),
     lastName: z.string().min(2, "Last name is required"),
-    email: z.string().email("Invalid email address"),
+    email: z.email("Invalid email address"),
     phone: z.string().min(8, "Phone number is required"),
     postcode: z.string().min(3, "Postcode is required"),
     policeReport: z
@@ -108,6 +108,8 @@ export const mechanicFormSchema = z.object({
             (file) => file && file[0]?.type === "application/pdf",
             "Only PDF files are allowed"
         ),
+
+    address: z.string().min(5, "Address is required"),
 });
 
 export type FormValues = z.infer<typeof mechanicFormSchema>;

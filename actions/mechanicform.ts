@@ -41,6 +41,7 @@ export const addMechanics = async (userId: string, token: string, formData: Form
       phone: formData.phone,
       postcode: formData.postcode,
       police_report: filePath, // store path
+      address: formData.address,
     },
       ])
       .select();
@@ -106,7 +107,8 @@ export const getMechanicByMechanicId = async (mechanicId: string, token: string)
       mechanic_application (
         postcode,
         phone,
-        police_report
+        police_report,
+        address
       )
     `)
     .eq("mechanic_id", mechanicId)

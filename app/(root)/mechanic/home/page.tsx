@@ -19,19 +19,22 @@ import { Coins, Headphones, Wallet } from "lucide-react";
 import Link from "next/link";
 import { FormValues, mechanicFormSchema } from "@/types";
 import { toast } from "sonner";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth, useUser } from "@clerk/nextjs";
 import { addMechanics } from "@/actions/mechanicform";
 
 const MechanicApplyHome = () => {
     const { userId, getToken } = useAuth();
+    const { user } = useUser();
     const form = useForm<FormValues>({
         resolver: zodResolver(mechanicFormSchema),
         defaultValues: {
-            firstName: "",
-            lastName: "",
-            email: "",
+            firstName: user?.firstName || "",
+            lastName: user?.lastName || "",
+            email: user?.emailAddresses[0]?.emailAddress || "",
             phone: "",
             postcode: "",
+            address: "",
+            policeReport: null,
         },
     });
 
@@ -95,9 +98,9 @@ const MechanicApplyHome = () => {
                             name="firstName"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>First Name *</FormLabel>
+                                    <FormLabel>First Name <span className="text-red-500">*</span></FormLabel>
                                     <FormControl>
-                                        <Input placeholder="John" {...field} />
+                                        <Input placeholder="John" {...field} disabled />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -110,9 +113,9 @@ const MechanicApplyHome = () => {
                             name="lastName"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Last Name *</FormLabel>
+                                    <FormLabel>Last Name <span className="text-red-500">*</span></FormLabel>
                                     <FormControl>
-                                        <Input placeholder="Doe" {...field} />
+                                        <Input placeholder="Doe" {...field} disabled />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -125,9 +128,9 @@ const MechanicApplyHome = () => {
                             name="email"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Email *</FormLabel>
+                                    <FormLabel>Email <span className="text-red-500">*</span></FormLabel>
                                     <FormControl>
-                                        <Input type="email" placeholder="john@example.com" {...field} />
+                                        <Input type="email" placeholder="john@example.com" {...field} disabled />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -140,9 +143,24 @@ const MechanicApplyHome = () => {
                             name="phone"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Mobile Number *</FormLabel>
+                                    <FormLabel>Mobile Number <span className="text-red-500">*</span></FormLabel>
                                     <FormControl>
                                         <Input type="tel" placeholder="08012345678" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        {/* Postcode */}
+                        <FormField
+                            control={form.control}
+                            name="address"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Address <span className="text-red-500">*</span></FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="" {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -155,7 +173,7 @@ const MechanicApplyHome = () => {
                             name="postcode"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Postcode *</FormLabel>
+                                    <FormLabel>Postcode <span className="text-red-500">*</span></FormLabel>
                                     <FormControl>
                                         <Input placeholder="100001" {...field} />
                                     </FormControl>
@@ -170,7 +188,7 @@ const MechanicApplyHome = () => {
                             name="policeReport"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Police Report (PDF) *</FormLabel>
+                                    <FormLabel>Police Report (PDF) <span className="text-red-500">*</span></FormLabel>
                                     <FormControl>
                                         <Input
                                             type="file"

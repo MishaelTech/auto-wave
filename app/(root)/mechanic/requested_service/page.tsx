@@ -26,6 +26,7 @@ import {
     Circle,
 } from "lucide-react";
 import { addMechanicToRepair } from "@/actions/repairs";
+import { formatDate, formatTime, statusColorClasses } from "@/lib/utils";
 
 const STATUS_STEPS = ["pending", "accepted", "completed"] as const;
 
@@ -50,6 +51,48 @@ const RequestedService = () => {
 
         setLoading(false);
     };
+
+    // const fetchBookingsForMechanicsToAccept = async () => {
+    //     const token = await getToken({ template: "supabase" });
+    //     if (!token) {
+    //         toast.error("User authentication failed. Please sign in again.");
+    //         return;
+    //     }
+
+    //     try {
+    //         const data = (await getRepairsForMechanic(token)) as Booking[];
+
+    //         // Filter to show only unassigned bookings or bookings assigned to this mechanic
+    //         const filteredBookings = data.filter(
+    //             (b) => !b.mechanic_id || b.mechanic_id === userId
+    //         );
+
+    //         setBookings(filteredBookings);
+    //     } catch (err) {
+    //         toast.error("Failed to load bookings");
+    //     }
+
+    //     setLoading(false);
+    // };
+
+    // const handleUpdateStatus = async (repairId: string, status: "accepted" | "completed") => {
+    //     const token = await getToken({ template: "supabase" });
+    //     if (!token) return;
+
+    //     try {
+    //         await updateRepairStatus(token, repairId, status);
+    //         toast.success(`Repair request marked as ${status}!`);
+
+    //         // Update state directly
+    //         setBookings((prev) =>
+    //             prev.map((b) => (b.id === repairId ? { ...b, status } : b))
+    //         );
+    //     } catch (err) {
+    //         toast.error(`Failed to update status to ${status}`);
+    //         console.error(err);
+    //     }
+    // };
+
 
     const handleUpdateStatus = async (repairId: string, status: "accepted" | "completed") => {
         const token = await getToken({ template: "supabase" });
@@ -85,36 +128,38 @@ const RequestedService = () => {
         }
     };
 
+    // const handleAcceptRepair = async (repairId: string) => {
+    //     const token = await getToken({ template: "supabase" });
+    //     if (!token || !userId) {
+    //         toast.error("User authentication failed. Please sign in again.");
+    //         return;
+    //     }
+
+    //     try {
+    //         await addMechanicToRepair(repairId, userId, token); // sets mechanic_id + accepted
+    //         toast.success("You have accepted the repair request!");
+
+    //         // Update the local bookings state
+    //         setBookings((prev) =>
+    //             prev.map((b) =>
+    //                 b.id === repairId ? { ...b, mechanic_id: userId, status: "accepted" } : b
+    //             )
+    //         );
+    //     } catch (error) {
+    //         toast.error("Failed to accept repair request");
+    //         console.error(error);
+    //     }
+    // };
+
+
 
     useEffect(() => {
         fetchBookingsForMechanicsToAccept();
     }, []);
 
-    function formatTime(time24: string) {
-        const [hourStr, minute] = time24.split(":");
-        let hour = parseInt(hourStr, 10);
-        const ampm = hour >= 12 ? "PM" : "AM";
-        hour = hour % 12 || 12;
-        return `${hour}:${minute} ${ampm}`;
-    }
-
-    function formatDate(isoString: string) {
-        const date = new Date(isoString);
-        return date.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
-    }
-
-    const statusColorClasses = (status: string) => {
-        switch (status) {
-            case "pending":
-                return "bg-yellow-100 text-yellow-800";
-            case "accepted":
-                return "bg-blue-100 text-blue-700";
-            case "completed":
-                return "bg-green-100 text-green-700";
-            default:
-                return "bg-gray-100 text-gray-700";
-        }
-    };
+    const filteredBookings = bookings.filter(
+        (b) => !b.mechanic_id || b.mechanic_id === userId
+    );
 
     const renderStatusTimeline = (currentStatus: string, repairId: string) => {
         return (
@@ -183,7 +228,7 @@ const RequestedService = () => {
                 <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Requested Services</h1>
                 <Separator />
 
-                {bookings.length === 0 ? (
+                {filteredBookings.length === 0 ? (
                     <Card className="p-6 text-center">
                         <CardTitle>No repair requests found</CardTitle>
                         <CardDescription>
@@ -193,7 +238,7 @@ const RequestedService = () => {
                 ) : (
                     <ScrollArea className="h-[70vh] pr-1 sm:pr-2">
                         <div className="space-y-4">
-                            {bookings.map((b) => (
+                            {filteredBookings.map((b) => (
                                 <Card key={b.id} className="shadow-sm border rounded-xl">
                                     <CardHeader>
                                         <div className="flex flex-wrap items-center justify-between gap-2 capitalize">
